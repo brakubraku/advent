@@ -1,2 +1,3 @@
 # Ignore all dist-newstyle directories recursively
 **/dist-newstyle/*
+.vscode/*
