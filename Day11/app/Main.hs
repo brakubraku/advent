@@ -29,24 +29,24 @@ main = do
   
 findPaths :: Ord a => M.Map a [a] -> a -> a -> [[a]]
 findPaths cs from to = 
-   let deadEnd (from,to) = unsafePerformIO $ rememberDeadEnd (from,to) >> pure Nothing
+   let deadEnd (from,to) = unsafePerformIO $ rememberDeadEnd (from,to) >> pure []
        findPaths' path from to 
-        | (unsafePerformIO $ isDeadEnd (from,to)) = Nothing
+        | (unsafePerformIO $ isDeadEnd (from,to)) = []
         | from `elem` path = deadEnd (from,to)
         | otherwise =
           let nodes = fromMaybe [] $ M.lookup from cs
             in if null nodes 
                then deadEnd (from,to)
                else if to `elem` nodes 
-                    then Just [[from,to]]
+                    then [from:to:path]
                     else 
-                      let paths = (concat . catMaybes $ 
+                      let paths = (concat $ 
                               (\f -> findPaths' (from:path) f to) <$> nodes)
                       in if null . concat $ paths 
                          then deadEnd (from,to)
-                         else Just $ (from:) <$> paths
+                         else paths
                          
-  in fromMaybe [] $ findPaths' [] from to
+  in findPaths' [] from to
 
 deadEnds = unsafePerformIO $ newIORef M.empty
 
